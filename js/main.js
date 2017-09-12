@@ -24,6 +24,9 @@ function generateRandomStr() {
   return randomHash;
 }
 
+$(document).ready(function() {
+  $('#fullpage').fullpage();
+});
 
 (function () {
   var data = {
@@ -160,8 +163,7 @@ function generateRandomStr() {
   function renderNet() {
     var net = new G6.Net({
       id: 'c1',
-      width: 1254,
-      fitView: 'autoZoom'
+      fitView: 'autoZoom',
     });
   
     net.tooltip({
@@ -180,49 +182,57 @@ function generateRandomStr() {
   var transNodeList = [];
   var transLineList = [];
   
+  var changeNodeList = [];
+  var changeLineList = [];
+  
+  var valueRoot = net._attrs.nodes[0];
+  var nodeRoot = net.find(valueRoot.id);
+  
+  var valueAB = net._attrs.nodes[3];
+  var nodeAB = net.find(valueAB.id);
+  
+  var valueCD = net._attrs.nodes[4];
+  var nodeCD = net.find(valueCD.id);
+  
+  var valueA = net._attrs.nodes[5];
+  var nodeA = net.find(valueA.id);
+  
+  var valueB = net._attrs.nodes[6];
+  var nodeB = net.find(valueB.id);
+  
+  var valueC = net._attrs.nodes[7];
+  var nodeC = net.find(valueC.id);
+  
+  var valueD = net._attrs.nodes[8];
+  var nodeD = net.find(valueD.id);
+  
+  var lineAB_ABCD = net._attrs.edges[2];
+  var lineCD_ABCD = net._attrs.edges[5];
+  var lineA_AB = net._attrs.edges[0];
+  var lineB_AB = net._attrs.edges[1];
+  var lineC_CD = net._attrs.edges[6];
+  var lineD_CD = net._attrs.edges[7];
+  
+  var prevNode = net.find('prevnode');
+  console.log(prevNode);
+  var nextNode = net.find('nextnode');
+  console.log(nextNode);
   function initView() {
-    var valueRoot = net._attrs.nodes[0];
-    var nodeRoot = net.find(valueRoot.id);
-    
-    var valueAB = net._attrs.nodes[3];
-    var nodeAB = net.find(valueAB.id);
-    
-    var valueCD = net._attrs.nodes[4];
-    var nodeCD = net.find(valueCD.id);
-    
-    var valueA = net._attrs.nodes[5];
-    var nodeA = net.find(valueA.id);
-    
-    var valueB = net._attrs.nodes[6];
-    var nodeB = net.find(valueB.id);
-    
-    var valueC = net._attrs.nodes[7];
-    var nodeC = net.find(valueC.id);
-    
-    var valueD = net._attrs.nodes[8];
-    var nodeD = net.find(valueD.id);
-    
     transNodeList.push(nodeAB);
     transNodeList.push(nodeCD);
     transNodeList.push(nodeA);
     transNodeList.push(nodeB);
     transNodeList.push(nodeC);
     transNodeList.push(nodeD);
-    
-    console.log("line", net._attrs.edges);
-    var lineAB_ABCD = net._attrs.edges[2];
-    var lineCD_ABCD = net._attrs.edges[5];
-    var lineA_AB = net._attrs.edges[0];
-    var lineB_AB = net._attrs.edges[1];
-    var lineC_CD = net._attrs.edges[6];
-    var lineD_CD = net._attrs.edges[7];
-    
+  
     transLineList.push(lineAB_ABCD);
     transLineList.push(lineCD_ABCD);
     transLineList.push(lineA_AB);
     transLineList.push(lineB_AB);
     transLineList.push(lineC_CD);
     transLineList.push(lineD_CD);
+    
+    console.log("line", net._attrs.edges);
     
     var hashAB = calcuteHeader(valueA.merkleroot, valueB.merkleroot);
     var hashCD = calcuteHeader(valueC.merkleroot, valueD.merkleroot);
@@ -251,39 +261,120 @@ function generateRandomStr() {
   
   var btnFind = initView();
   
+  var changeIndex = 0;
+  
   function calculateRoot(){
+    changeLineList.splice(0,changeLineList.length);
+    changeNodeList.splice(0,changeNodeList.length);
+    
     var randomStr = generateRandomStr();
     console.log('randomStr', randomStr);
     
-    var changeIndex = Math.round(Math.random() * 6);
+    changeIndex = Math.round(Math.random() * 3);
     console.log('changeIndex', changeIndex);
     
-    //var changeNode = transNodeList[changeIndex];
-    if(changeIndex >= 0 && changeIndex < 2){
-      calculateSecond();
-    }else{
-      calculateSecond();
-      calculateThird();
+    switch (changeIndex){
+      case 0: {
+        changeLineList.push(lineA_AB);
+        changeLineList.push(lineAB_ABCD);
+        
+        changeNodeList.push(nodeA);
+        changeNodeList.push(nodeAB);
+        changeNodeList.push(nodeRoot);
+  
+        changeNodeList.push(prevNode);
+        changeNodeList.push(nextNode);
+        break;
+      }
+      
+      case 1:{
+        changeLineList.push(lineB_AB);
+        changeLineList.push(lineAB_ABCD);
+        
+        changeNodeList.push(nodeB);
+        changeNodeList.push(nodeAB);
+        changeNodeList.push(nodeRoot);
+  
+        changeNodeList.push(prevNode);
+        changeNodeList.push(nextNode);
+        break;
+      }
+      
+      case 2:{
+        changeLineList.push(lineC_CD);
+        changeLineList.push(lineCD_ABCD);
+        
+        changeNodeList.push(nodeC);
+        changeNodeList.push(nodeCD);
+        changeNodeList.push(nodeRoot);
+  
+        changeNodeList.push(prevNode);
+        changeNodeList.push(nextNode);
+        break;
+      }
+      case 3:{
+        changeLineList.push(lineD_CD);
+        changeLineList.push(lineCD_ABCD);
+        
+        changeNodeList.push(nodeD);
+        changeNodeList.push(nodeCD);
+        changeNodeList.push(nodeRoot);
+  
+        changeNodeList.push(prevNode);
+        changeNodeList.push(nextNode);
+        break
+      }
+      default:{
+        break
+      }
     }
   }
   
-  function calculateSecond() {
-    // TODO
-    console.log("calculateSecond");
-  }
+  // 需要修改的节点和连线
+  function reRenderView(changeNodeList) {
+    resetAllNode();
+    var delay = 0;
+    for(var  i = 0 ; i < changeNodeList.length; i++){
+      delay += 250;
+      (function (i) {
+        setTimeout(function () {
+          renderItem(changeNodeList[i]);
+        },delay);
+      })(i);
+    }
   
-  function calculateThird() {
-    // TODO
-    console.log("calculateThird");
-  }
-  
-  function reRenderView() {
-    // TODO
+    net.refresh();
     console.log('reRenderView');
+  }
+  
+  function renderItem(node){
+    console.log(node);
+    net.update(node,{
+      color: 'red'
+    });
+  }
+  
+  function resetAllNode(){
+    for(var i = 0 ; i < net._attrs.nodes.length; i++){
+      var item = net._attrs.nodes[i];
+      
+      var node = net.find(item.id);
+      net.update(node,{
+        color: ''
+      });
+    }
+  
+    net.refresh();
+    // for(var j = 0 ; i < net._attrs.edges; i++){
+    //   var edge = net._attrs.edges[j];
+    //   net.remove(edge,{
+    //     color: 'red'
+    //   });
+    // }
   }
   
   btnFind.on('click', function (ev) {
     calculateRoot();
-    reRenderView();
+    reRenderView(changeNodeList);
   });
 })();

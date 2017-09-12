@@ -288,3 +288,18 @@ textarea {
         page-break-after: avoid;
     }
 }
+
+h1, h2, h3, h4, h5, h6{
+  color: #444;
+}
+
+.section p{
+  width: 85%;
+  margin: 0 auto;
+  font-size: 1.5em;
+  margin-top: 20px;
+  color: rgba(0,0,0,.5);
+}
+.section img{
+  margin-top: 20px;
+}
